@@ -15,8 +15,7 @@ from labscript_utils import PY2
 if PY2:
     str = unicode
 
-from labscript_utils.numpy_dtype_workaround import dtype_workaround
-from labscript_devices import labscript_device, BLACS_tab, BLACS_worker
+from labscript_devices import  BLACS_tab
 from labscript import StaticAnalogQuantity, Device, LabscriptError, set_passed_properties
 import numpy as np
 
@@ -35,7 +34,7 @@ class ZaberStageTLS28M(StaticAnalogQuantity):
     maxval=282879
     description = 'Zaber Stage T-LS28-M'
 
-@labscript_device
+
 class ZaberStageController(Device):
     allowed_children = [ZaberStageTLSR150D,ZaberStageTLSR300D,ZaberStageTLS28M]
     generation = 0
@@ -62,7 +61,7 @@ class ZaberStageController(Device):
                 raise LabscriptError('%s %s has invalid connection number: %s'%(stage.description,stage.name,str(stage.connection)))
             data_dict[str(stage.connection)] = value
         dtypes = [(conn, int) for conn in data_dict]
-        data_array = np.zeros(1, dtype=dtype_workaround(dtypes))
+        data_array = np.zeros(1, dtype=dtypes)
         for conn in data_dict:
             data_array[0][conn] = data_dict[conn] 
         grp = hdf5_file.create_group('/devices/'+self.name)
@@ -126,7 +125,7 @@ class ZaberstageControllerTab(DeviceTab):
         self.create_worker("main_worker",ZaberWorker,{'com_port':self.com_port})
         self.primary_worker = "main_worker"
 
-@BLACS_worker    
+
 class ZaberWorker(Worker):
     def init(self):
         # TODO: Make this configurable
